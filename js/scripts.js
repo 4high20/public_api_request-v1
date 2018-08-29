@@ -5,8 +5,9 @@ searchForm.setAttribute('action', '#');
 searchForm.setAttribute('method', 'get');
 document.querySelector('.search-container').appendChild(searchForm);
 
-//declare search dom variables
+let usersList;
 
+//declare search dom variables
 const searchSubmit = document.querySelector('#search-submit');
 const searchInput = document.querySelector('#search-input')
 const gallery = document.querySelector('#gallery');
@@ -36,6 +37,8 @@ function removeModal(){
   modal.remove();
 }
 
+let userIndex = 0;
+
 //this function creates gallery items div with each user card inside and listens for clicks on cards to display the modal window
 function createUsers(users){
   for(let i = 0; i < 12; i++){
@@ -43,21 +46,26 @@ function createUsers(users){
     galleryItems.innerHTML = `<div class="card-img-container"><img class="card-img" src="${users[i].picture.large}" alt="profile picture"></div><div class="card-info-container"><h3 id="name" class="card-name cap">${users[i].name.first} ${users[i].name.last}</h3><p class="card-text">${users[i].email}</p><p class="card-text cap">${users[i].location.city}</p></div>`;
     galleryItems.classList.add('card');
     document.querySelector('#gallery').appendChild(galleryItems);
+    test = galleryItems;
     galleryItems.addEventListener('click', (e) => {
+      userIndex = i;
       createModal(users[i]);
-      const btnPrev = document.querySelector('#modal-prev');
-      const btnNext = document.querySelector('#modal-next');
-      btnPrev.addEventListener('click', () => {
-        removeModal();
-        createModal(users[i - 1]);
-      })
-      btnNext.addEventListener('click', () => {
-        removeModal();
-        createModal(users[i + 1]);
-      })
     })
   }
 }
+
+document.addEventListener('click', (e) => {
+  if(e.target.textContent === 'Prev' && userIndex !== 0){
+    removeModal();
+    createModal(usersList[userIndex - 1]);
+    userIndex--;
+  }
+  if(e.target.textContent === 'Next' && userIndex !== 11){
+    removeModal();
+    createModal(usersList[userIndex + 1]);
+    userIndex++;
+  }
+});
 
 //this function creates the modal window
 function createModal(user){
@@ -77,4 +85,7 @@ const url = 'https://randomuser.me/api/?results=12&nat=gb';
 //fetch 12 random users
 fetch(url)
   .then(response => response.json())
-  .then(data => createUsers(data.results));
+  .then(data => {
+    usersList = data.results;
+    createUsers(data.results);
+  });
